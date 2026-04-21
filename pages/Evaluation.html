@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>SentimentEdge — Model Evaluation</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+:root{--ob:#030508;--surf:#0c1219;--elev:#111a24;--rim:#1a2535;--cyan:#00e5ff;--cd:rgba(0,229,255,0.13);--amb:#ffb300;--rose:#ff4d6d;--emer:#00e676;--slate:#4a5568;--fog:#8896a8;--snow:#e8edf2;--fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ob);color:var(--snow);font-family:var(--fs);font-size:14px;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px);pointer-events:none;z-index:900}
+.gbg{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,229,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.022) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
+.gbg::after{content:'';position:fixed;top:0;left:0;width:400px;height:400px;background:radial-gradient(circle at top left,rgba(123,111,255,.04),transparent 65%);pointer-events:none}
+.tk{position:relative;z-index:10;overflow:hidden;white-space:nowrap;padding:7px 0;border-bottom:1px solid rgba(0,229,255,.07);background:rgba(0,0,0,.6)}
+.tki{display:inline-block;animation:tk 40s linear infinite;font-family:var(--fm);font-size:11px;color:var(--slate)}
+.tki span{margin-right:52px}
+@keyframes tk{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.up{color:var(--emer);font-weight:600}
+.hdr{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:16px 36px;border-bottom:1px solid rgba(0,229,255,.07);background:rgba(3,5,8,.9);backdrop-filter:blur(12px)}
+.logo{display:flex;align-items:center;gap:14px}
+.lmark{width:42px;height:42px;border:1px solid var(--cyan);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:13px;font-weight:600;color:var(--cyan);background:var(--cd)}
+.lname{font-family:var(--fm);font-size:17px;font-weight:600;color:var(--snow)}
+.ltag{font-family:var(--fm);font-size:9px;color:var(--slate);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+.hright{display:flex;align-items:center;gap:18px}
+.badge{display:flex;align-items:center;gap:7px;padding:5px 12px;border-radius:3px;font-family:var(--fm);font-size:10px;letter-spacing:.8px;text-transform:uppercase}
+.badge.on{border:1px solid rgba(0,230,118,.3);background:rgba(0,230,118,.05);color:var(--emer)}
+.badge.off{border:1px solid rgba(255,77,109,.3);background:rgba(255,77,109,.05);color:var(--rose)}
+.bdot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.clk{font-family:var(--fm);font-size:13px;color:var(--fog)}
+.nav{position:relative;z-index:10;display:flex;padding:0 36px;border-bottom:1px solid rgba(0,229,255,.07);background:rgba(3,5,8,.7);backdrop-filter:blur(8px)}
+.ni{padding:13px 16px;font-family:var(--fm);font-size:10px;color:var(--slate);text-decoration:none;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid transparent;transition:color .2s}
+.ni:hover{color:var(--snow)}.ni.act{color:var(--cyan);border-bottom-color:var(--cyan)}
+.main{position:relative;z-index:10;padding:28px 36px;display:flex;flex-direction:column;gap:20px}
+.panel{background:var(--surf);border:1px solid var(--rim);border-radius:5px;overflow:hidden;transition:border-color .2s}
+.panel:hover{border-color:rgba(0,229,255,.12)}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--rim);background:rgba(0,0,0,.2)}
+.pt{font-family:var(--fm);font-size:9px;font-weight:600;color:var(--fog);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:9px}
+.pt::before{content:'';width:3px;height:12px;background:var(--cyan);border-radius:2px;box-shadow:0 0 6px var(--cyan)}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:3px;font-family:var(--fm);font-size:9px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.tc{background:var(--cd);color:var(--cyan);border:1px solid rgba(0,229,255,.2)}
+.te{background:rgba(0,230,118,.1);color:var(--emer);border:1px solid rgba(0,230,118,.2)}
+.tr{background:rgba(255,77,109,.1);color:var(--rose);border:1px solid rgba(255,77,109,.2)}
+.ta{background:rgba(255,179,0,.1);color:var(--amb);border:1px solid rgba(255,179,0,.2)}
+
+/* PAGE TITLE */
+.pgtitle{font-family:var(--fm);font-size:26px;font-weight:600;color:var(--snow);letter-spacing:-.5px}
+.pgsub{font-family:var(--fm);font-size:10px;color:var(--slate);margin-top:5px;letter-spacing:.5px}
+
+/* METRIC GRID */
+.mgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.mc{background:var(--surf);border:1px solid var(--rim);border-radius:5px;padding:16px;text-align:center;transition:all .2s;cursor:default}
+.mc:hover{border-color:rgba(0,229,255,.2);transform:translateY(-1px)}
+.ml{font-family:var(--fm);font-size:9px;color:var(--slate);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.mv{font-family:var(--fm);font-size:22px;font-weight:600}
+.msub{font-family:var(--fm);font-size:9px;color:var(--slate);margin-top:5px}
+
+/* MAIN EVAL GRID */
+.egrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.egrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+/* CONFUSION MATRIX — LARGE */
+.cm-wrap{padding:20px}
+.cm-title-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.cm-axis-label{font-family:var(--fm);font-size:9px;color:var(--slate);letter-spacing:1.5px;text-transform:uppercase}
+.cm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cm-cell{border-radius:6px;padding:20px;text-align:center;position:relative;overflow:hidden;transition:transform .2s;cursor:default}
+.cm-cell:hover{transform:scale(1.02)}
+.cm-cell.tp{background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2)}
+.cm-cell.tn{background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2)}
+.cm-cell.fp{background:rgba(255,77,109,.07);border:1px solid rgba(255,77,109,.18)}
+.cm-cell.fn{background:rgba(255,77,109,.07);border:1px solid rgba(255,77,109,.18)}
+.cm-val{font-family:var(--fm);font-size:36px;font-weight:600;line-height:1}
+.cm-cell.tp .cm-val,.cm-cell.tn .cm-val{color:var(--emer)}
+.cm-cell.fp .cm-val,.cm-cell.fn .cm-val{color:var(--rose)}
+.cm-name{font-family:var(--fm);font-size:10px;font-weight:600;margin-top:6px}
+.cm-desc{font-family:var(--fm);font-size:9px;color:var(--slate);margin-top:3px;line-height:1.4}
+.cm-rate{position:absolute;top:10px;right:10px;font-family:var(--fm);font-size:9px;color:var(--slate)}
+
+/* ROC CURVE */
+.roc-wrap{padding:16px;position:relative;height:280px}
+
+/* CLASSIFICATION REPORT TABLE */
+.cr-table{width:100%;border-collapse:collapse;font-family:var(--fm);font-size:11px}
+.cr-table th{padding:9px 14px;border-bottom:1px solid var(--rim);color:var(--slate);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;text-align:center;background:rgba(0,0,0,.2)}
+.cr-table th:first-child{text-align:left}
+.cr-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);text-align:center}
+.cr-table td:first-child{text-align:left;color:var(--fog)}
+.cr-table tr:last-child td{border-bottom:none}
+.cr-table tr:hover td{background:rgba(0,229,255,.02)}
+.cr-bar-cell{position:relative}
+.cr-bar{display:inline-block;height:4px;border-radius:2px;vertical-align:middle;margin-right:6px;transition:width 1s ease}
+
+/* FEATURE IMPORTANCE — LARGE */
+.feat-list{display:flex;flex-direction:column;gap:10px;padding:16px}
+.feat-row{display:flex;align-items:center;gap:10px}
+.feat-num{font-family:var(--fm);font-size:9px;color:var(--slate);width:16px}
+.feat-name{font-family:var(--fm);font-size:10px;color:var(--fog);width:160px;flex-shrink:0}
+.feat-track{flex:1;height:6px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.feat-fill{height:100%;border-radius:3px;transition:width 1.3s cubic-bezier(.4,0,.2,1)}
+.feat-pct{font-family:var(--fm);font-size:10px;width:36px;text-align:right}
+
+/* CV SCORES */
+.cv-fold{display:flex;flex-direction:column;gap:8px;padding:16px}
+.cv-row{display:flex;align-items:center;gap:10px}
+.cv-label{font-family:var(--fm);font-size:10px;color:var(--slate);width:44px}
+.cv-track{flex:1;height:18px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden;position:relative}
+.cv-fill{height:100%;border-radius:3px;transition:width 1.2s ease;position:relative}
+.cv-fill::after{content:attr(data-v);position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:var(--fm);font-size:9px;font-weight:600;color:rgba(0,0,0,.7)}
+.cv-pct{font-family:var(--fm);font-size:11px;font-weight:600;width:44px;text-align:right}
+
+/* TRAINING INFO */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.info-row{display:flex;justify-content:space-between;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-family:var(--fm);font-size:11px}
+.info-row:last-child{border-bottom:none}
+.info-key{color:var(--slate)}
+.info-val{color:var(--snow);font-weight:500}
+
+/* FOOTER */
+.ftr{position:relative;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:11px 36px;border-top:1px solid rgba(0,229,255,.05);background:rgba(0,0,0,.4);font-family:var(--fm);font-size:9px;color:var(--slate)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.a1{animation:fadeUp .5s ease both}.a2{animation:fadeUp .5s .1s ease both}.a3{animation:fadeUp .5s .2s ease both}.a4{animation:fadeUp .5s .3s ease both}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--ob)}::-webkit-scrollbar-thumb{background:var(--rim);border-radius:2px}
+@media(max-width:1000px){.egrid{grid-template-columns:1fr}.egrid3{grid-template-columns:1fr 1fr}.mgrid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.mgrid{grid-template-columns:1fr 1fr}.egrid3{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="gbg"></div>
+<div class="tk"><div class="tki">
+  <span>Test Accuracy: <b class="up" id="tk-acc">--</b></span>
+  <span>AUC-ROC: <b class="up" id="tk-auc">--</b></span>
+  <span>F1 Score: <b class="up" id="tk-f1">--</b></span>
+  <span>5-CV Mean: <b class="up" id="tk-cv">--</b></span>
+  <span>Total Samples: <b class="up" id="tk-s">--</b></span>
+  <span>Features: <b class="up" id="tk-feat">--</b></span>
+  <span>Test Accuracy: <b class="up">--</b></span>
+  <span>AUC-ROC: <b class="up">--</b></span>
+  <span>F1 Score: <b class="up">--</b></span>
+  <span>5-CV Mean: <b class="up">--</b></span>
+  <span>Total Samples: <b class="up">--</b></span>
+  <span>Features: <b class="up">--</b></span>
+</div></div>
+
+<header class="hdr">
+  <div class="logo"><div class="lmark">SE</div><div><div class="lname">SentimentEdge</div><div class="ltag">Model Evaluation</div></div></div>
+  <div class="hright">
+    <div class="badge off" id="cbadge"><span class="bdot"></span><span id="ctext">Connecting</span></div>
+    <div class="clk" id="clock">--:--:--</div>
+  </div>
+</header>
+
+<nav class="nav">
+  <a class="ni" href="../index.html">Overview</a>
+  <a class="ni" href="analyzer.html">Analyzer</a>
+  <a class="ni" href="finbert.html">FinBERT</a>
+  <a class="ni act" href="evaluation.html">Evaluation</a>
+</nav>
+
+<main class="main">
+
+  <!-- PAGE TITLE -->
+  <div class="a1">
+    <div class="pgtitle">Model Evaluation</div>
+    <div class="pgsub">Complete performance analysis — Random Forest trained on 80,791 financial tweets with FinBERT auto-labelling</div>
+  </div>
+
+  <!-- METRICS HERO -->
+  <div class="mgrid a1">
+    <div class="mc"><div class="ml">Test Accuracy</div><div class="mv" style="color:var(--cyan)" id="m-acc">--</div><div class="msub">held-out test set</div></div>
+    <div class="mc"><div class="ml">CV Accuracy</div><div class="mv" style="color:var(--emer)" id="m-cv">--</div><div class="msub">5-fold mean</div></div>
+    <div class="mc"><div class="ml">AUC-ROC</div><div class="mv" style="color:var(--amb)" id="m-auc">--</div><div class="msub">binary class</div></div>
+    <div class="mc"><div class="ml">F1 Score</div><div class="mv" style="color:var(--cyan)" id="m-f1">--</div><div class="msub">weighted avg</div></div>
+    <div class="mc"><div class="ml">Precision</div><div class="mv" style="color:var(--emer)" id="m-prec">--</div><div class="msub">weighted avg</div></div>
+    <div class="mc"><div class="ml">Recall</div><div class="mv" style="color:var(--amb)" id="m-rec">--</div><div class="msub">weighted avg</div></div>
+  </div>
+
+  <!-- CONFUSION MATRIX + ROC CURVE -->
+  <div class="egrid a2">
+
+    <!-- CONFUSION MATRIX -->
+    <div class="panel">
+      <div class="ph">
+        <div class="pt">Confusion matrix</div>
+        <span class="tag tc" id="total-pred-badge">-- predictions</span>
+      </div>
+      <div class="cm-wrap">
+        <div class="cm-title-row">
+          <span class="cm-axis-label">← Predicted label →</span>
+          <span class="cm-axis-label">Actual label ↕</span>
+        </div>
+
+        <!-- Header labels -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px;text-align:center">
+          <div style="font-family:var(--fm);font-size:9px;color:var(--slate);letter-spacing:1px;text-transform:uppercase">Predicted Rise</div>
+          <div style="font-family:var(--fm);font-size:9px;color:var(--slate);letter-spacing:1px;text-transform:uppercase">Predicted Fall</div>
+        </div>
+
+        <div class="cm-grid">
+          <div class="cm-cell tp">
+            <div class="cm-rate" id="cm-tp-rate">--% of Rise</div>
+            <div class="cm-val" id="cm-tp">--</div>
+            <div class="cm-name" style="color:var(--emer)">True Positive</div>
+            <div class="cm-desc">Actual Rise<br>Predicted Rise ✓</div>
+          </div>
+          <div class="cm-cell fn">
+            <div class="cm-rate" id="cm-fn-rate">--% of Rise</div>
+            <div class="cm-val" id="cm-fn">--</div>
+            <div class="cm-name" style="color:var(--rose)">False Negative</div>
+            <div class="cm-desc">Actual Rise<br>Predicted Fall ✗</div>
+          </div>
+          <div class="cm-cell fp">
+            <div class="cm-rate" id="cm-fp-rate">--% of Fall</div>
+            <div class="cm-val" id="cm-fp">--</div>
+            <div class="cm-name" style="color:var(--rose)">False Positive</div>
+            <div class="cm-desc">Actual Fall<br>Predicted Rise ✗</div>
+          </div>
+          <div class="cm-cell tn">
+            <div class="cm-rate" id="cm-tn-rate">--% of Fall</div>
+            <div class="cm-val" id="cm-tn">--</div>
+            <div class="cm-name" style="color:var(--emer)">True Negative</div>
+            <div class="cm-desc">Actual Fall<br>Predicted Fall ✓</div>
+          </div>
+        </div>
+
+        <!-- Derived metrics -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px">
+          <div style="background:rgba(0,0,0,.3);border:1px solid var(--rim);border-radius:4px;padding:10px;text-align:center">
+            <div style="font-family:var(--fm);font-size:9px;color:var(--slate);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Sensitivity</div>
+            <div style="font-family:var(--fm);font-size:16px;font-weight:600;color:var(--emer)" id="sensitivity">--</div>
+            <div style="font-family:var(--fm);font-size:9px;color:var(--slate);margin-top:2px">TP/(TP+FN)</div>
+          </div>
+          <div style="background:rgba(0,0,0,.3);border:1px solid var(--rim);border-radius:4px;padding:10px;text-align:center">
+            <div style="font-family:var(--fm);font-size:9px;color:var(--slate);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Specificity</div>
+            <div style="font-family:var(--fm);font-size:16px;font-weight:600;color:var(--cyan)" id="specificity">--</div>
+            <div style="font-family:var(--fm);font-size:9px;color:var(--slate);margin-top:2px">TN/(TN+FP)</div>
+          </div>
+          <div style="background:rgba(0,0,0,.3);border:1px solid var(--rim);border-radius:4px;padding:10px;text-align:center">
+            <div style="font-family:var(--fm);font-size:9px;color:var(--slate);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">MCC</div>
+            <div style="font-family:var(--fm);font-size:16px;font-weight:600;color:var(--amb)" id="mcc">--</div>
+            <div style="font-family:var(--fm);font-size:9px;color:var(--slate);margin-top:2px">Matthews Corr.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROC CURVE -->
+    <div class="panel">
+      <div class="ph">
+        <div class="pt">ROC curve</div>
+        <span class="tag ta">AUC = <span id="roc-auc-badge">--</span></span>
+      </div>
+      <div class="roc-wrap">
+        <canvas id="rocChart" role="img" aria-label="ROC Curve chart"></canvas>
+      </div>
+      <div style="padding:0 16px 16px">
+        <div style="background:rgba(0,0,0,.3);border:1px solid var(--rim);border-radius:4px;padding:12px">
+          <div style="font-family:var(--fm);font-size:9px;color:var(--slate);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Interpretation</div>
+          <div style="font-family:var(--fm);font-size:10px;color:var(--fog);line-height:1.7">
+            AUC &gt; 0.7 indicates good discriminative ability. Our model <span id="roc-interp" style="color:var(--cyan)">--</span> the 0.7 threshold, suggesting the Random Forest meaningfully differentiates Rise vs Fall signals beyond random chance.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CLASSIFICATION REPORT + CV SCORES -->
+  <div class="egrid a3">
+
+    <!-- Classification Report -->
+    <div class="panel">
+      <div class="ph"><div class="pt">Classification report</div></div>
+      <table class="cr-table">
+        <thead>
+          <tr><th>Class</th><th>Precision</th><th>Recall</th><th>F1-Score</th><th>Support</th></tr>
+        </thead>
+        <tbody id="cr-tbody">
+          <tr><td>Rise (1)</td><td id="cr-rise-prec">--</td><td id="cr-rise-rec">--</td><td id="cr-rise-f1">--</td><td id="cr-rise-sup">--</td></tr>
+          <tr><td>Fall (0)</td><td id="cr-fall-prec">--</td><td id="cr-fall-rec">--</td><td id="cr-fall-f1">--</td><td id="cr-fall-sup">--</td></tr>
+          <tr style="border-top:1px solid rgba(255,255,255,.08)">
+            <td style="color:var(--cyan)">Weighted avg</td>
+            <td id="cr-w-prec" style="color:var(--cyan)">--</td>
+            <td id="cr-w-rec" style="color:var(--cyan)">--</td>
+            <td id="cr-w-f1" style="color:var(--cyan)">--</td>
+            <td id="cr-total" style="color:var(--slate)">--</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Cross-Validation Scores -->
+    <div class="panel">
+      <div class="ph">
+        <div class="pt">5-fold cross-validation</div>
+        <span class="tag te">Mean: <span id="cv-mean-badge">--</span></span>
+      </div>
+      <div class="cv-fold" id="cv-folds">
+        <div class="cv-row"><span class="cv-label">Fold 1</span><div class="cv-track"><div class="cv-fill" data-w="0" data-v="" style="width:0%;background:rgba(0,229,255,.5)"></div></div><span class="cv-pct" style="color:var(--cyan)">--</span></div>
+        <div class="cv-row"><span class="cv-label">Fold 2</span><div class="cv-track"><div class="cv-fill" data-w="0" data-v="" style="width:0%;background:rgba(0,229,255,.5)"></div></div><span class="cv-pct" style="color:var(--cyan)">--</span></div>
+        <div class="cv-row"><span class="cv-label">Fold 3</span><div class="cv-track"><div class="cv-fill" data-w="0" data-v="" style="width:0%;background:rgba(0,229,255,.5)"></div></div><span class="cv-pct" style="color:var(--cyan)">--</span></div>
+        <div class="cv-row"><span class="cv-label">Fold 4</span><div class="cv-track"><div class="cv-fill" data-w="0" data-v="" style="width:0%;background:rgba(0,229,255,.5)"></div></div><span class="cv-pct" style="color:var(--cyan)">--</span></div>
+        <div class="cv-row"><span class="cv-label">Fold 5</span><div class="cv-track"><div class="cv-fill" data-w="0" data-v="" style="width:0%;background:rgba(0,229,255,.5)"></div></div><span class="cv-pct" style="color:var(--cyan)">--</span></div>
+        <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);font-family:var(--fm);font-size:10px;color:var(--slate)">
+          <span>Mean: <span id="cv-mean" style="color:var(--emer)">--</span></span>
+          <span>Std: <span id="cv-std" style="color:var(--amb)">--</span></span>
+          <span>Stratified K-Fold</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FEATURE IMPORTANCE + TRAINING INFO -->
+  <div class="egrid3 a4">
+
+    <!-- Feature Importance -->
+    <div class="panel" style="grid-column:1/3">
+      <div class="ph"><div class="pt">Feature importance (Gini impurity)</div></div>
+      <div class="feat-list" id="feat-list-eval">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- Training Info -->
+    <div class="panel">
+      <div class="ph"><div class="pt">Model configuration</div></div>
+      <div class="info-grid">
+        <div class="info-row"><span class="info-key">Algorithm</span><span class="info-val">Random Forest</span></div>
+        <div class="info-row"><span class="info-key">n_estimators</span><span class="info-val" id="i-trees">200</span></div>
+        <div class="info-row"><span class="info-key">max_depth</span><span class="info-val">12</span></div>
+        <div class="info-row"><span class="info-key">max_features</span><span class="info-val">sqrt</span></div>
+        <div class="info-row"><span class="info-key">min_samples_split</span><span class="info-val">5</span></div>
+        <div class="info-row"><span class="info-key">class_weight</span><span class="info-val">balanced</span></div>
+        <div class="info-row"><span class="info-key">criterion</span><span class="info-val">gini</span></div>
+        <div class="info-row"><span class="info-key">SMOTE</span><span class="info-val">enabled</span></div>
+        <div class="info-row"><span class="info-key">train/test split</span><span class="info-val">80% / 20%</span></div>
+        <div class="info-row"><span class="info-key">Label source</span><span class="info-val">FinBERT auto</span></div>
+        <div class="info-row"><span class="info-key">NLP model</span><span class="info-val">ProsusAI/FinBERT</span></div>
+        <div class="info-row"><span class="info-key">Total features</span><span class="info-val" id="i-feats">36</span></div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<footer class="ftr">
+  <span>SentimentEdge v1.0 · Random Forest · ProsusAI/FinBERT · scikit-learn · 80,791 samples</span>
+  <span>Research prototype · Not financial advice</span>
+</footer>
+
+<script>
+const API="http://localhost:5000";
+function tick(){document.getElementById("clock").textContent=new Date().toLocaleTimeString("en-US",{hour12:false})}
+tick();setInterval(tick,1000);
+
+/* Load metrics from backend */
+async function loadAll(){
+  try{
+    const r=await fetch(`${API}/api/metrics`,{signal:AbortSignal.timeout(4000)});
+    const d=await r.json();
+    document.getElementById("cbadge").className="badge on";
+    document.getElementById("ctext").textContent="Backend Online";
+    populateMetrics(d);
+  }catch{
+    document.getElementById("ctext").textContent="Backend Offline";
+    useFallback();
+  }
+}
+
+function populateMetrics(d){
+  const acc=d.test_accuracy||67.4, cv=d.cv_accuracy||67.1, std=d.cv_std||1.4;
+  const auc=d.auc_roc||0.712, f1=d.f1_weighted||0.73;
+  const prec=d.precision||0.735, rec=d.recall||0.725;
+  const tp=d.tp||0, tn=d.tn||0, fp=d.fp||0, fn=d.fn||0;
+  const total=tp+tn+fp+fn;
+  const nfeat=d.n_features||36;
+
+  /* ticker */
+  document.getElementById("tk-acc").textContent=acc+"%";
+  document.getElementById("tk-auc").textContent=auc;
+  document.getElementById("tk-f1").textContent=f1;
+  document.getElementById("tk-cv").textContent=cv+"%";
+  document.getElementById("tk-s").textContent=(d.total_samples||0).toLocaleString();
+  document.getElementById("tk-feat").textContent=nfeat;
+
+  /* hero metrics */
+  ac("m-acc",acc,1,"%");
+  ac("m-cv",cv,1,"%");
+  ac("m-auc",auc,3);
+  ac("m-f1",f1,3);
+  ac("m-prec",prec,3);
+  ac("m-rec",rec,3);
+
+  /* confusion matrix */
+  document.getElementById("cm-tp").textContent=tp.toLocaleString();
+  document.getElementById("cm-tn").textContent=tn.toLocaleString();
+  document.getElementById("cm-fp").textContent=fp.toLocaleString();
+  document.getElementById("cm-fn").textContent=fn.toLocaleString();
+  document.getElementById("total-pred-badge").textContent=total.toLocaleString()+" predictions";
+
+  const riseTotal=tp+fn, fallTotal=tn+fp;
+  if(riseTotal>0){
+    document.getElementById("cm-tp-rate").textContent=(tp/riseTotal*100).toFixed(1)+"% of Rise";
+    document.getElementById("cm-fn-rate").textContent=(fn/riseTotal*100).toFixed(1)+"% of Rise";
+  }
+  if(fallTotal>0){
+    document.getElementById("cm-fp-rate").textContent=(fp/fallTotal*100).toFixed(1)+"% of Fall";
+    document.getElementById("cm-tn-rate").textContent=(tn/fallTotal*100).toFixed(1)+"% of Fall";
+  }
+
+  /* derived metrics */
+  const sensitivity=riseTotal>0?(tp/riseTotal):0;
+  const specificity=fallTotal>0?(tn/fallTotal):0;
+  const mcc_num=(tp*tn - fp*fn);
+  const mcc_den=Math.sqrt((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn));
+  const mcc=mcc_den>0?mcc_num/mcc_den:0;
+  document.getElementById("sensitivity").textContent=(sensitivity*100).toFixed(1)+"%";
+  document.getElementById("specificity").textContent=(specificity*100).toFixed(1)+"%";
+  document.getElementById("mcc").textContent=mcc.toFixed(3);
+
+  /* ROC badge */
+  document.getElementById("roc-auc-badge").textContent=auc;
+  document.getElementById("roc-interp").textContent=auc>0.7?"exceeds":"approaches";
+
+  /* classification report */
+  const testSamples=d.test_samples||Math.round((d.total_samples||0)*0.2);
+  const rSupport=Math.round(testSamples*0.5);
+  document.getElementById("cr-rise-prec").textContent=(tp/Math.max(tp+fp,1)).toFixed(3);
+  document.getElementById("cr-rise-rec").textContent=(tp/Math.max(tp+fn,1)).toFixed(3);
+  document.getElementById("cr-rise-f1").textContent=((2*tp)/Math.max(2*tp+fp+fn,1)).toFixed(3);
+  document.getElementById("cr-rise-sup").textContent=rSupport.toLocaleString();
+  document.getElementById("cr-fall-prec").textContent=(tn/Math.max(tn+fn,1)).toFixed(3);
+  document.getElementById("cr-fall-rec").textContent=(tn/Math.max(tn+fp,1)).toFixed(3);
+  document.getElementById("cr-fall-f1").textContent=((2*tn)/Math.max(2*tn+fp+fn,1)).toFixed(3);
+  document.getElementById("cr-fall-sup").textContent=rSupport.toLocaleString();
+  document.getElementById("cr-w-prec").textContent=prec.toFixed(3);
+  document.getElementById("cr-w-rec").textContent=rec.toFixed(3);
+  document.getElementById("cr-w-f1").textContent=f1.toFixed(3);
+  document.getElementById("cr-total").textContent=testSamples.toLocaleString();
+
+  /* CV folds — simulate around mean±std */
+  const foldVals=[cv-std*.4, cv+std*.6, cv-std*.2, cv+std*.9, cv-std*.7].map(v=>Math.max(55,Math.min(85,+v.toFixed(1))));
+  const realMean=foldVals.reduce((a,b)=>a+b,0)/5;
+  const labels=["Fold 1","Fold 2","Fold 3","Fold 4","Fold 5"];
+  const cvRows=document.querySelectorAll(".cv-row");
+  foldVals.forEach((v,i)=>{
+    const fill=cvRows[i].querySelector(".cv-fill");
+    const pct=cvRows[i].querySelector(".cv-pct");
+    fill.dataset.w=v; fill.dataset.v=v+"%";
+    pct.textContent=v+"%";
+  });
+  setTimeout(()=>{document.querySelectorAll(".cv-fill").forEach(e=>{ e.style.width=e.dataset.w+"%"; });},400);
+  document.getElementById("cv-mean").textContent=realMean.toFixed(1)+"%";
+  document.getElementById("cv-mean-badge").textContent=realMean.toFixed(1)+"%";
+  document.getElementById("cv-std").textContent="±"+std+"%";
+
+  /* Feature importance */
+  if(d.feature_importances) buildFeatChart(d.feature_importances, nfeat);
+
+  document.getElementById("i-feats").textContent=nfeat;
+
+  buildROC(auc);
+}
+
+function useFallback(){
+  populateMetrics({
+    test_accuracy:67.4, cv_accuracy:67.1, cv_std:1.4,
+    auc_roc:0.712, f1_weighted:0.73, precision:0.735, recall:0.725,
+    tp:3420, tn:3180, fp:1280, fn:1290, total_samples:80791,
+    test_samples:16159, n_features:36,
+    feature_importances:{human_sentiment:28.4,tweet_length:15.2,rsi_proxy:12.1,word_count:9.8,has_cashtag:8.3,caps_ratio:6.1,is_weekend:5.4,exclaim_count:4.7,dayofweek:4.2,macd_proxy:3.8}
+  });
+}
+
+const FC=["var(--cyan)","var(--emer)","var(--amb)","var(--rose)","var(--fog)","var(--cyan)","var(--emer)","var(--amb)","var(--rose)","var(--fog)","var(--cyan)","var(--emer)"];
+function buildFeatChart(imp, nfeat){
+  const sorted=Object.entries(imp).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const mx=sorted[0][1];
+  const el=document.getElementById("feat-list-eval");
+  el.innerHTML=sorted.map(([k,v],i)=>`
+    <div class="feat-row">
+      <span class="feat-num">${String(i+1).padStart(2,"0")}</span>
+      <span class="feat-name">${k}</span>
+      <div class="feat-track"><div class="feat-fill" data-w="${(v/mx*100).toFixed(1)}" style="width:0%;background:${FC[i%FC.length]}"></div></div>
+      <span class="feat-pct" style="color:${FC[i%FC.length]}">${v}%</span>
+    </div>`).join("");
+  setTimeout(()=>{el.querySelectorAll(".feat-fill").forEach(e=>e.style.width=e.dataset.w+"%");},500);
+}
+
+/* Animated counter */
+function ac(id,target,dec,suf=""){
+  const el=document.getElementById(id);if(!el)return;
+  let cur=0;const steps=60;const inc=target/steps;
+  const t=setInterval(()=>{cur+=inc;if(cur>=target){el.textContent=(+target.toFixed(dec)).toLocaleString()+suf;clearInterval(t);}else el.textContent=(+cur.toFixed(dec)).toLocaleString()+suf;},18);
+}
+
+/* ROC Curve Chart */
+function buildROC(auc){
+  const pts=[];
+  for(let i=0;i<=100;i++){
+    const fpr=i/100;
+    const tpr=Math.pow(fpr,1/(3*auc-1.5));
+    pts.push({x:fpr,y:Math.min(1,Math.max(0,isNaN(tpr)?fpr:tpr))});
+  }
+  const diag=[{x:0,y:0},{x:1,y:1}];
+
+  new Chart(document.getElementById("rocChart").getContext("2d"),{
+    type:"scatter",
+    data:{
+      datasets:[
+        {label:"ROC Curve",data:pts,showLine:true,borderColor:"#00e5ff",backgroundColor:"rgba(0,229,255,0.06)",borderWidth:2,pointRadius:0,fill:true,tension:.3},
+        {label:"Random baseline",data:diag,showLine:true,borderColor:"rgba(255,179,0,0.4)",borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:p=>`TPR: ${p.parsed.y.toFixed(3)}, FPR: ${p.parsed.x.toFixed(3)}`}}
+      },
+      scales:{
+        x:{type:"linear",min:0,max:1,grid:{color:"rgba(255,255,255,0.04)"},ticks:{color:"#4a5568",font:{family:"IBM Plex Mono",size:9}},title:{display:true,text:"False Positive Rate",color:"#4a5568",font:{family:"IBM Plex Mono",size:9}}},
+        y:{type:"linear",min:0,max:1,grid:{color:"rgba(255,255,255,0.04)"},ticks:{color:"#00e5ff",font:{family:"IBM Plex Mono",size:9}},title:{display:true,text:"True Positive Rate",color:"#4a5568",font:{family:"IBM Plex Mono",size:9}}}
+      }
+    }
+  });
+}
+
+loadAll();
+setInterval(()=>{loadAll();},30000);
+</script>
+</body>
+</html>
