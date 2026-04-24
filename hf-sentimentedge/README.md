@@ -1,8 +1,8 @@
 ---
-title: SentimentEdge
-emoji: 🔥
-colorFrom: indigo
-colorTo: red
+title: Sentiment
+emoji: 📚
+colorFrom: purple
+colorTo: purple
 sdk: docker
 pinned: false
 ---

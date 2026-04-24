@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>SentimentEdge — Dataset Analyzer</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <style>
+:root{--ob:#030508;--surf:#0c1219;--elev:#111a24;--rim:#1a2535;--cyan:#00e5ff;--cd:rgba(0,229,255,0.13);--amb:#ffb300;--rose:#ff4d6d;--emer:#00e676;--slate:#4a5568;--fog:#8896a8;--snow:#e8edf2;--fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ob);color:var(--snow);font-family:var(--fs);font-size:14px;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px);pointer-events:none;z-index:900}
+.gbg{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,229,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.022) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
+.gbg::after{content:'';position:fixed;bottom:0;left:0;width:500px;height:400px;background:radial-gradient(circle at bottom left,rgba(0,230,118,.03),transparent 65%);pointer-events:none}
+.tk{position:relative;z-index:10;overflow:hidden;white-space:nowrap;padding:7px 0;border-bottom:1px solid rgba(0,229,255,.07);background:rgba(0,0,0,.6)}
+.tki{display:inline-block;animation:tk 40s linear infinite;font-family:var(--fm);font-size:11px;color:var(--slate)}
+.tki span{margin-right:52px}
+@keyframes tk{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.up{color:var(--emer);font-weight:600}.dn{color:var(--rose);font-weight:600}
+.hdr{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:16px 36px;border-bottom:1px solid rgba(0,229,255,.07);background:rgba(3,5,8,.9);backdrop-filter:blur(12px)}
+.logo{display:flex;align-items:center;gap:14px}
+.lmark{width:42px;height:42px;border:1px solid var(--cyan);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:13px;font-weight:600;color:var(--cyan);background:var(--cd)}
+.lname{font-family:var(--fm);font-size:17px;font-weight:600;color:var(--snow)}
+.ltag{font-family:var(--fm);font-size:9px;color:var(--slate);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+.hright{display:flex;align-items:center;gap:18px}
+.badge{display:flex;align-items:center;gap:7px;padding:5px 12px;border-radius:3px;font-family:var(--fm);font-size:10px;letter-spacing:.8px;text-transform:uppercase}
+.badge.on{border:1px solid rgba(0,230,118,.3);background:rgba(0,230,118,.05);color:var(--emer)}
+.badge.off{border:1px solid rgba(255,77,109,.3);background:rgba(255,77,109,.05);color:var(--rose)}
+.bdot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.clk{font-family:var(--fm);font-size:13px;color:var(--fog)}
+.nav{position:relative;z-index:10;display:flex;padding:0 36px;border-bottom:1px solid rgba(0,229,255,.07);background:rgba(3,5,8,.7);backdrop-filter:blur(8px)}
+.ni{padding:13px 16px;font-family:var(--fm);font-size:10px;color:var(--slate);text-decoration:none;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid transparent;transition:color .2s}
+.ni:hover{color:var(--snow)}.ni.act{color:var(--cyan);border-bottom-color:var(--cyan)}
+.main{position:relative;z-index:10;padding:28px 36px;display:flex;flex-direction:column;gap:20px}
+.panel{background:var(--surf);border:1px solid var(--rim);border-radius:5px;overflow:hidden;transition:border-color .2s}
+.panel:hover{border-color:rgba(0,229,255,.12)}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--rim);background:rgba(0,0,0,.2)}
+.pt{font-family:var(--fm);font-size:9px;font-weight:600;color:var(--fog);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:9px}
+.pt::before{content:'';width:3px;height:12px;background:var(--cyan);border-radius:2px;box-shadow:0 0 6px var(--cyan)}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:3px;font-family:var(--fm);font-size:9px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.tc{background:var(--cd);color:var(--cyan);border:1px solid rgba(0,229,255,.2)}
+.te{background:rgba(0,230,118,.1);color:var(--emer);border:1px solid rgba(0,230,118,.2)}
+.tr{background:rgba(255,77,109,.1);color:var(--rose);border:1px solid rgba(255,77,109,.2)}
+.ta{background:rgba(255,179,0,.1);color:var(--amb);border:1px solid rgba(255,179,0,.2)}
+.tg{background:transparent;color:var(--slate);border:1px solid var(--rim)}
+.tg:hover{color:var(--snow);border-color:var(--fog)}
+
+/* PAGE HEADER */
+.pghead{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.pgtitle{font-family:var(--fm);font-size:26px;font-weight:600;color:var(--snow);letter-spacing:-.5px}
+.pgsub{font-family:var(--fm);font-size:10px;color:var(--slate);margin-top:5px;letter-spacing:.5px}
+
+/* STATS ROW */
+.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.sc2{background:var(--surf);border:1px solid var(--rim);border-radius:5px;padding:16px;text-align:center;transition:border-color .2s}
+.sc2:hover{border-color:rgba(0,229,255,.2)}
+.sl{font-family:var(--fm);font-size:9px;color:var(--slate);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.sv2{font-family:var(--fm);font-size:24px;font-weight:600}
+
+/* SEARCH BAR */
+.search-row{display:flex;gap:10px;align-items:center}
+.search-input{flex:1;padding:10px 16px;background:rgba(0,0,0,.4);border:1px solid var(--rim);border-radius:4px;color:var(--snow);font-family:var(--fm);font-size:12px;outline:none;transition:border-color .2s}
+.search-input:focus{border-color:rgba(0,229,255,.3)}
+.search-input::placeholder{color:var(--slate)}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+
+/* TWEET TABLE */
+.ttable{width:100%;border-collapse:collapse;font-family:var(--fm);font-size:11px}
+.ttable th{padding:8px 14px;border-bottom:1px solid var(--rim);color:var(--slate);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;text-align:left;background:rgba(0,0,0,.2)}
+.ttable td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+.ttable tr:hover td{background:rgba(0,229,255,.02)}
+.ttable tr:last-child td{border-bottom:none}
+.tweet-cell{max-width:380px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--fog)}
+.stock-badge{font-family:var(--fm);font-size:10px;font-weight:600;color:var(--cyan)}
+.date-cell{color:var(--slate);font-size:10px}
+
+/* CHARTS GRID */
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart-box{position:relative;height:220px;padding:16px}
+
+/* PAGINATION */
+.pag{display:flex;align-items:center;gap:8px;padding:12px 16px;border-top:1px solid var(--rim);font-family:var(--fm);font-size:10px;color:var(--slate)}
+.pag-btn{padding:4px 10px;border:1px solid var(--rim);border-radius:3px;background:transparent;color:var(--fog);font-family:var(--fm);font-size:10px;cursor:pointer;transition:all .2s}
+.pag-btn:hover:not(:disabled){border-color:rgba(0,229,255,.3);color:var(--cyan)}
+.pag-btn:disabled{opacity:.3;cursor:not-allowed}
+.pag-info{flex:1;text-align:center}
+
+/* FOOTER */
+.ftr{position:relative;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:11px 36px;border-top:1px solid rgba(0,229,255,.05);background:rgba(0,0,0,.4);font-family:var(--fm);font-size:9px;color:var(--slate)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.a1{animation:fadeUp .5s ease both}.a2{animation:fadeUp .5s .1s ease both}.a3{animation:fadeUp .5s .2s ease both}
+::-webkit-scrollbar{width:3px;height:3px}::-webkit-scrollbar-track{background:var(--ob)}::-webkit-scrollbar-thumb{background:var(--rim);border-radius:2px}
+@media(max-width:900px){.srow{grid-template-columns:1fr 1fr}.cgrid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="gbg"></div>
+<div class="tk"><div class="tki">
+  <span>Dataset: 80,791 tweets</span><span>Stocks: EEENF <b class="up">56%</b></span><span>SOL <b class="up">17%</b></span>
+  <span>Date range: 2021-03-23 → 2021-04-09</span><span>Unique users: 9,662+</span>
+  <span>Positive: <b class="up">3,685</b></span><span>Negative: <b class="dn">2,106</b></span>
+  <span>Dataset: 80,791 tweets</span><span>Stocks: EEENF <b class="up">56%</b></span><span>SOL <b class="up">17%</b></span>
+  <span>Date range: 2021-03-23 → 2021-04-09</span><span>Unique users: 9,662+</span>
+  <span>Positive: <b class="up">3,685</b></span><span>Negative: <b class="dn">2,106</b></span>
+</div></div>
+
+<header class="hdr">
+  <div class="logo"><div class="lmark">SE</div><div><div class="lname">SentimentEdge</div><div class="ltag">Dataset Analyzer</div></div></div>
+  <div class="hright">
+    <div class="badge off" id="cbadge"><span class="bdot"></span><span id="ctext">Connecting</span></div>
+    <div class="clk" id="clock">--:--:--</div>
+  </div>
+</header>
+
+<nav class="nav">
+  <a class="ni" href="/">Overview</a>
+  <a class="ni act" href="/analyzer">Analyzer</a>
+  <a class="ni" href="/finbert">FinBERT</a>
+  <a class="ni" href="/evaluation">Evaluation</a>
+</nav>
+
+<main class="main">
+
+  <!-- PAGE HEADER -->
+  <div class="pghead a1">
+    <div>
+      <div class="pgtitle">Dataset Explorer</div>
+      <div class="pgsub">Browse, filter and analyze the financial Twitter sentiment corpus used for training</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span class="tag tc" id="total-badge">80,791 tweets</span>
+      <span class="tag te">2021-03-23 → 2021-04-09</span>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="srow a1">
+    <div class="sc2"><div class="sl">Total Tweets</div><div class="sv2" style="color:var(--cyan)" id="s-total">80,791</div></div>
+    <div class="sc2"><div class="sl">Positive</div><div class="sv2" style="color:var(--emer)" id="s-pos">3,685</div></div>
+    <div class="sc2"><div class="sl">Negative</div><div class="sv2" style="color:var(--rose)" id="s-neg">2,106</div></div>
+    <div class="sc2"><div class="sl">Unique Stocks</div><div class="sv2" style="color:var(--amb)" id="s-stocks">2,780+</div></div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="cgrid a2">
+    <div class="panel">
+      <div class="ph"><div class="pt">Volume by day</div></div>
+      <div class="chart-box"><canvas id="volChart" role="img" aria-label="Volume by day chart"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><div class="pt">Sentiment distribution</div></div>
+      <div class="chart-box"><canvas id="distChart" role="img" aria-label="Sentiment distribution chart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- SEARCH + FILTER -->
+  <div class="panel a2">
+    <div class="ph"><div class="pt">Tweet explorer</div><span id="filter-count" style="font-family:var(--fm);font-size:10px;color:var(--slate)">Showing all</span></div>
+    <div style="padding:14px">
+      <div class="search-row">
+        <input class="search-input" id="search" placeholder="Search tweets, tickers, users..." oninput="filterData()"/>
+        <button class="tag tc" onclick="clearFilters()" style="padding:8px 14px;font-size:10px">Clear</button>
+      </div>
+      <div class="filter-row">
+        <span style="font-family:var(--fm);font-size:9px;color:var(--slate);letter-spacing:1px;text-transform:uppercase;align-self:center">Sentiment:</span>
+        <button class="tag tc act-filter" data-f="all"    onclick="setSentFilter('all',this)">All</button>
+        <button class="tag tg"            data-f="pos"    onclick="setSentFilter('pos',this)">Positive</button>
+        <button class="tag tg"            data-f="neg"    onclick="setSentFilter('neg',this)">Negative</button>
+        <button class="tag tg"            data-f="neu"    onclick="setSentFilter('neu',this)">Neutral</button>
+        <span style="font-family:var(--fm);font-size:9px;color:var(--slate);letter-spacing:1px;text-transform:uppercase;align-self:center;margin-left:8px">Stock:</span>
+        <button class="tag tg" data-s="all"   onclick="setStockFilter('all',this)">All</button>
+        <button class="tag tg" data-s="EEENF" onclick="setStockFilter('EEENF',this)">EEENF</button>
+        <button class="tag tg" data-s="SOL"   onclick="setStockFilter('SOL',this)">SOL</button>
+        <button class="tag tg" data-s="AXTG"  onclick="setStockFilter('AXTG',this)">AXTG</button>
+      </div>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table class="ttable">
+        <thead>
+          <tr>
+            <th>Stock</th>
+            <th>Tweet</th>
+            <th>Sentiment</th>
+            <th>Known Pumper</th>
+            <th>Price Signal</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="tweet-tbody"></tbody>
+      </table>
+    </div>
+    <div class="pag">
+      <button class="pag-btn" id="prev-btn" onclick="prevPage()" disabled>← Prev</button>
+      <div class="pag-info" id="pag-info">Page 1 of --</div>
+      <button class="pag-btn" id="next-btn" onclick="nextPage()">Next →</button>
+    </div>
+  </div>
+
+</main>
+
+<footer class="ftr">
+  <span>SentimentEdge v1.0 · Dataset: Financial Twitter Corpus 2021 · 80,791 rows</span>
+  <span>Research prototype · Not financial advice</span>
+</footer>
+
+<script>
+function tick(){document.getElementById("clock").textContent=new Date().toLocaleTimeString("en-US",{hour12:false})}
+tick();setInterval(tick,1000);
+
+async function checkConn(){
+  try{
+    const r=await fetch("https://vectorxx-sentiment.hf.space/api/status",{signal:AbortSignal.timeout(3000)});
+    const d=await r.json();
+    if(d.status==="online"){document.getElementById("cbadge").className="badge on";document.getElementById("ctext").textContent="Backend Online";}
+  }catch{document.getElementById("ctext").textContent="Backend Offline";}
+}
+checkConn();setInterval(checkConn,10000);
+
+/* Sample dataset (representative subset) */
+const DATASET=[
+  {stock:"EEENF",tweet:"$EEENF breaking out! Volume surge massive. This is the one everyone's been waiting for.",sent:"pos",pumper:1,region:1,date:"2021-03-29"},
+  {stock:"EEENF",tweet:"RT $EEENF short squeeze incoming. Float is tiny. Watch this rocket.",sent:"pos",pumper:1,region:1,date:"2021-03-29"},
+  {stock:"SOL",tweet:"$SOL ATH!!! フォロワー感謝 Solana breaking all records today.",sent:"pos",pumper:0,region:1,date:"2021-03-30"},
+  {stock:"EEENF",tweet:"$EEENF massive sell-off continues. Avoid. Pumpers exit now.",sent:"neg",pumper:0,region:-1,date:"2021-04-01"},
+  {stock:"AXTG",tweet:"RT @UCitnow @ShortSqueezed1 @EVO9MRPLEASE $AXTG New intern CEO.",sent:"neu",pumper:0,region:0,date:"2021-03-25"},
+  {stock:"SOL",tweet:"Solana ecosystem growing fast. $SOL fundamentals strong long-term.",sent:"pos",pumper:0,region:1,date:"2021-04-02"},
+  {stock:"EEENF",tweet:"$EEENF consolidating after run. Hold for next leg up.",sent:"neu",pumper:1,region:0,date:"2021-03-28"},
+  {stock:"SOL",tweet:"$SOL correction incoming. Overbought. Take profits here.",sent:"neg",pumper:0,region:-1,date:"2021-04-05"},
+  {stock:"EEENF",tweet:"Loading up $EEENF. Diamond hands. This goes 10x from here.",sent:"pos",pumper:1,region:1,date:"2021-03-27"},
+  {stock:"AXTG",tweet:"$AXTG new management could be a catalyst. Watching closely.",sent:"pos",pumper:0,region:0,date:"2021-03-26"},
+  {stock:"SOL",tweet:"Developers migrating to Solana. Ecosystem expanding rapidly. $SOL",sent:"pos",pumper:0,region:1,date:"2021-04-06"},
+  {stock:"EEENF",tweet:"$EEENF filing concerns. Due diligence needed before entering.",sent:"neg",pumper:0,region:-1,date:"2021-04-03"},
+  {stock:"SOL",tweet:"$SOL 50% above moving average. Technically extended. Caution.",sent:"neg",pumper:0,region:-1,date:"2021-04-07"},
+  {stock:"AXTG",tweet:"$AXTG volume picking up. Something brewing here.",sent:"neu",pumper:0,region:0,date:"2021-03-30"},
+  {stock:"EEENF",tweet:"Bought more $EEENF at open. Feel strong about this week.",sent:"pos",pumper:1,region:1,date:"2021-03-31"},
+  {stock:"SOL",tweet:"$SOL Solana TVL hits new record. DeFi adoption accelerating.",sent:"pos",pumper:0,region:1,date:"2021-04-08"},
+];
+
+let filtered=[...DATASET];
+let page=0;
+const PER_PAGE=8;
+let sentF="all",stockF="all";
+
+function filterData(){
+  const q=document.getElementById("search").value.toLowerCase().trim();
+  filtered=DATASET.filter(r=>{
+    const matchSent=sentF==="all"||(sentF==="pos"&&r.sent==="pos")||(sentF==="neg"&&r.sent==="neg")||(sentF==="neu"&&r.sent==="neu");
+    const matchStock=stockF==="all"||r.stock===stockF;
+    const matchQ=!q||r.tweet.toLowerCase().includes(q)||r.stock.toLowerCase().includes(q);
+    return matchSent&&matchStock&&matchQ;
+  });
+  page=0;renderTable();
+}
+
+function setSentFilter(f,btn){
+  sentF=f;
+  document.querySelectorAll("[data-f]").forEach(b=>{b.className="tag tg";});
+  btn.className="tag tc";
+  filterData();
+}
+
+function setStockFilter(s,btn){
+  stockF=s;
+  document.querySelectorAll("[data-s]").forEach(b=>{b.className="tag tg";});
+  btn.className="tag tc";
+  filterData();
+}
+
+function clearFilters(){
+  document.getElementById("search").value="";
+  sentF="all"; stockF="all";
+  document.querySelectorAll("[data-f]").forEach(b=>b.className="tag tg");
+  document.querySelectorAll("[data-s]").forEach(b=>b.className="tag tg");
+  document.querySelector("[data-f='all']").className="tag tc";
+  document.querySelector("[data-s='all']").className="tag tc";
+  filtered=[...DATASET];page=0;renderTable();
+}
+
+function sentLabel(s){
+  if(s==="pos") return '<span class="tag te">POS</span>';
+  if(s==="neg") return '<span class="tag tr">NEG</span>';
+  return '<span class="tag ta">NEU</span>';
+}
+function boolTag(v){return v===1?'<span class="tag te">YES</span>':'<span style="font-family:var(--fm);font-size:10px;color:var(--slate)">—</span>';}
+function signalTag(v){if(v===1)return'<span class="tag te">BUY</span>';if(v===-1)return'<span class="tag tr">SELL</span>';return'<span class="tag ta">HOLD</span>';}
+
+function renderTable(){
+  const totalP=Math.ceil(filtered.length/PER_PAGE)||1;
+  const slice=filtered.slice(page*PER_PAGE,(page+1)*PER_PAGE);
+  document.getElementById("tweet-tbody").innerHTML=slice.map(r=>`
+    <tr>
+      <td><span class="stock-badge">$${r.stock}</span></td>
+      <td><div class="tweet-cell">${r.tweet}</div></td>
+      <td>${sentLabel(r.sent)}</td>
+      <td>${boolTag(r.pumper)}</td>
+      <td>${signalTag(r.region)}</td>
+      <td class="date-cell">${r.date}</td>
+    </tr>`).join("");
+  document.getElementById("pag-info").textContent=`Page ${page+1} of ${totalP} · ${filtered.length} rows`;
+  document.getElementById("prev-btn").disabled=page===0;
+  document.getElementById("next-btn").disabled=page>=totalP-1;
+  document.getElementById("filter-count").textContent=`Showing ${filtered.length} of ${DATASET.length}`;
+}
+
+function prevPage(){if(page>0){page--;renderTable();}}
+function nextPage(){const tp=Math.ceil(filtered.length/PER_PAGE);if(page<tp-1){page++;renderTable();}}
+
+renderTable();
+
+/* Volume by day chart */
+new Chart(document.getElementById("volChart").getContext("2d"),{
+  type:"bar",
+  data:{
+    labels:["Mar 23","Mar 24","Mar 25","Mar 26","Mar 27","Mar 28","Mar 29","Mar 30","Mar 31","Apr 1","Apr 2","Apr 3","Apr 4","Apr 5","Apr 6","Apr 7","Apr 8","Apr 9"],
+    datasets:[{data:[366,336,309,430,447,190,881,1774,867,685,271,399,186,280,255,707,840,406,297,150],backgroundColor:"rgba(0,229,255,0.15)",borderColor:"rgba(0,229,255,0.5)",borderWidth:1,borderRadius:2}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:"rgba(255,255,255,0.03)"},ticks:{color:"#4a5568",font:{family:"IBM Plex Mono",size:9},maxRotation:45}},y:{grid:{color:"rgba(255,255,255,0.04)"},ticks:{color:"#4a5568",font:{family:"IBM Plex Mono",size:9}}}}}
+});
+
+/* Sentiment donut */
+new Chart(document.getElementById("distChart").getContext("2d"),{
+  type:"doughnut",
+  data:{labels:["Positive","Negative","Neutral"],datasets:[{data:[3685,2106,4320],backgroundColor:["rgba(0,230,118,0.7)","rgba(255,77,109,0.7)","rgba(255,179,0,0.5)"],borderColor:["#00e676","#ff4d6d","#ffb300"],borderWidth:1.5,hoverOffset:6}]},
+  options:{responsive:true,maintainAspectRatio:false,cutout:"68%",plugins:{legend:{display:false}},layout:{padding:10}}
+});
+</script>
+</body>
+</html>

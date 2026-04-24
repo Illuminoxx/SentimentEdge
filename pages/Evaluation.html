@@ -5,6 +5,8 @@
   <title>SentimentEdge — Model Evaluation</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
   <style>
 :root{--ob:#030508;--surf:#0c1219;--elev:#111a24;--rim:#1a2535;--cyan:#00e5ff;--cd:rgba(0,229,255,0.13);--amb:#ffb300;--rose:#ff4d6d;--emer:#00e676;--slate:#4a5568;--fog:#8896a8;--snow:#e8edf2;--fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -152,10 +154,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 </header>
 
 <nav class="nav">
-  <a class="ni" href="../index.html">Overview</a>
-  <a class="ni" href="analyzer.html">Analyzer</a>
-  <a class="ni" href="finbert.html">FinBERT</a>
-  <a class="ni act" href="evaluation.html">Evaluation</a>
+  <a class="ni" href="/">Overview</a>
+  <a class="ni" href="/analyzer">Analyzer</a>
+  <a class="ni" href="/finbert">FinBERT</a>
+  <a class="ni act" href="/evaluation">Evaluation</a>
 </nav>
 
 <main class="main">
@@ -352,7 +354,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 </footer>
 
 <script>
-const API="http://localhost:5000";
+const API="https://vectorxx-sentiment.hf.space";
 function tick(){document.getElementById("clock").textContent=new Date().toLocaleTimeString("en-US",{hour12:false})}
 tick();setInterval(tick,1000);
 

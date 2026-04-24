@@ -15,7 +15,7 @@
 import os
 import time
 import traceback
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from dotenv import load_dotenv
 
@@ -23,6 +23,23 @@ load_dotenv()
 
 app = Flask(__name__)
 CORS(app)   # allow dashboard HTML to call this API
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/analyzer")
+def analyzer():
+    return render_template("analyzer.html")
+
+@app.route("/finbert")
+def finbert():
+    return render_template("finbert.html")
+
+@app.route("/evaluation")
+def evaluation():
+    return render_template("evaluation.html")
+
 
 # Import our modules
 from model   import classify_text, classify_batch
@@ -220,4 +237,4 @@ if __name__ == "__main__":
     print(f"  Metrics →  http://localhost:{port}/api/metrics")
     print("="*55 + "\n")
     app.run(host="0.0.0.0", port=port, debug=debug)
-    app.run(host="0.0.0.0", port=port, debug=debug)
+  
