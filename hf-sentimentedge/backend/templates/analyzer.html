@@ -211,7 +211,7 @@ tick();setInterval(tick,1000);
 
 async function checkConn(){
   try{
-    const r=await fetch("/api/status",{signal:AbortSignal.timeout(3000)});
+    const r=await fetch("https://vectorxx-sentiment.hf.space/api/status",{signal:AbortSignal.timeout(3000)});
     const d=await r.json();
     if(d.status==="online"){document.getElementById("cbadge").className="badge on";document.getElementById("ctext").textContent="Backend Online";}
   }catch{document.getElementById("ctext").textContent="Backend Offline";}

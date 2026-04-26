@@ -352,14 +352,14 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 </footer>
 
 <script>
-const API="";
+const API="https://vectorxx-sentiment.hf.space";
 function tick(){document.getElementById("clock").textContent=new Date().toLocaleTimeString("en-US",{hour12:false})}
 tick();setInterval(tick,1000);
 
 /* Load metrics from backend */
 async function loadAll(){
   try{
-    const r=await fetch(`${API}/api/metrics`,{signal:AbortSignal.timeout(4000)});
+    const r=await fetch(`${API}https://vectorxx-sentiment.hf.space/api/metrics`,{signal:AbortSignal.timeout(4000)});
     const d=await r.json();
     document.getElementById("cbadge").className="badge on";
     document.getElementById("ctext").textContent="Backend Online";

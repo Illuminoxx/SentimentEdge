@@ -371,7 +371,7 @@ updateClock(); setInterval(updateClock, 1000);
 /* ── Check backend + load model metrics ── */
 async function checkConnection() {
   try {
-    const res  = await fetch(`${API}/api/status`, {signal: AbortSignal.timeout(3000)});
+    const res  = await fetch(`${API}https://vectorxx-sentiment.hf.space/api/status`, {signal: AbortSignal.timeout(3000)});
     const data = await res.json();
     const badge = document.getElementById("conn-badge");
     if (data.status === "online") {
@@ -386,7 +386,7 @@ async function checkConnection() {
 
 async function loadMetrics() {
   try {
-    const res  = await fetch(`${API}/api/metrics`);
+    const res  = await fetch(`${API}https://vectorxx-sentiment.hf.space/api/metrics`);
     const data = await res.json();
     document.getElementById("m-acc").textContent     = data.test_accuracy + "%";
     document.getElementById("m-auc").textContent     = data.auc_roc;
@@ -446,7 +446,7 @@ async function runAnalysis() {
   spinner.style.display = "block";
 
   try {
-    const res = await fetch(`${API}/api/predict`, {
+    const res = await fetch(`${API}https://vectorxx-sentiment.hf.space/api/predict`, {
       method:  "POST",
       headers: {"Content-Type": "application/json"},
       body:    JSON.stringify({
