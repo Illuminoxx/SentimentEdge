@@ -3,8 +3,12 @@
 Financial sentiment analysis combining **FinBERT + Random Forest**
 for next-day stock movement prediction.
 
-## 🔴 Live Demo
-👉 https://vectorxx-sentiment.hf.space/
+## How it works
+1. demand financial text at real time as input by user
+2. Runs each word through FinBERT for sentiment scoring
+3. Combines sentiment features with price/volume data
+4. Random Forest predicts next-day movement (Rise/Fall)
+
 
 ## Stack
 | Layer | Tech |
@@ -15,11 +19,11 @@ for next-day stock movement prediction.
 | Backend | Flask |
 | Deployment | Hugging Face Spaces (Docker) |
 
-## How it works
-1. demand financial text at real time as input by user
-2. Runs each word through FinBERT for sentiment scoring
-3. Combines sentiment features with price/volume data
-4. Random Forest predicts next-day movement (Rise/Fall)
+
+
+   ## 🔴 Live Demo
+👉 https://vectorxx-sentiment.hf.space/
+
 
 ## Run Locally 
 - git clone https://github.com/Illuminoxx/SentimentEdge.git
