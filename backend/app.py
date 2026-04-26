@@ -15,26 +15,30 @@
 import os
 import time
 import traceback
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)   # allow dashboard HTML to call this API
+CORS(app)
+
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 @app.route("/analyzer")
 def analyzer():
-    return send_from_directory("../pages", "analyzer.html")
+    return render_template("analyzer.html")
 
-@app.route("/finbert")  
+@app.route("/finbert")
 def finbert():
-    return send_from_directory("../pages", "finbert.html")
+    return render_template("finbert.html")
 
 @app.route("/evaluation")
 def evaluation():
-    return send_from_directory("../pages", "evaluation.html")
+    return render_template("evaluation.html")
 
 
 # Import our modules
