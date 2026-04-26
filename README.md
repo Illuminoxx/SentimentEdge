@@ -21,8 +21,8 @@ for next-day stock movement prediction.
 3. Combines sentiment features with price/volume data
 4. Random Forest predicts next-day movement (Rise/Fall)
 
-## Run Locally (fully offline)
--git clone https://github.com/Illuminoxx/SentimentEdge.git
--cd SentimentEdge
--pip install -r requirements.txt
--python backend/app.py
+## Run Locally 
+- git clone https://github.com/Illuminoxx/SentimentEdge.git
+- cd SentimentEdge
+- pip install -r requirements.txt
+- python backend/app.py
