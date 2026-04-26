@@ -4,7 +4,7 @@ Financial sentiment analysis combining **FinBERT + Random Forest**
 for next-day stock movement prediction.
 
 ## 🔴 Live Demo
-👉 https://vectorxx-sentimentedge.hf.space
+👉 (https://vectorxx-sentimentedge.hf.space)
 
 ## Stack
 | Layer | Tech |
