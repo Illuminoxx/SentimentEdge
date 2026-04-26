@@ -152,8 +152,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 </header>
 
 <nav class="nav">
-  <a class="ni" href="/">Overview</a>
-  <a class="ni" href=/analyzer">Analyzer</a>
+  <a class="ni" href="../index.html">Overview</a>
+  <a class="ni" href="analyzer.html">Analyzer</a>
   <a class="ni" href="finbert.html">FinBERT</a>
   <a class="ni act" href="evaluation.html">Evaluation</a>
 </nav>
@@ -352,7 +352,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 </footer>
 
 <script>
-const API="";
+const API=const API=window.location.origin;
 function tick(){document.getElementById("clock").textContent=new Date().toLocaleTimeString("en-US",{hour12:false})}
 tick();setInterval(tick,1000);
 

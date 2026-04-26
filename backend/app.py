@@ -24,9 +24,17 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)   # allow dashboard HTML to call this API
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+@app.route("/analyzer")
+def analyzer():
+    return send_from_directory("../pages", "analyzer.html")
+
+@app.route("/finbert")  
+def finbert():
+    return send_from_directory("../pages", "finbert.html")
+
+@app.route("/evaluation")
+def evaluation():
+    return send_from_directory("../pages", "evaluation.html")
 
 
 # Import our modules

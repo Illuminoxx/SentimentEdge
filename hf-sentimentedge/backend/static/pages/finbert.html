@@ -195,8 +195,8 @@
 
 <!-- NAV -->
 <nav class="nav">
-  <a class="nav-item" href="/">overview</a>
-  <a class="nav-item" href=/analyzer">tweet analyzer</a>
+  <a class="nav-item" href="../index.html">overview</a>
+  <a class="nav-item" href="analyzer.html">tweet analyzer</a>
   <a class="nav-item active" href="finbert.html">finbert</a>
   <a class="nav-item hidden" href="rf_model.html">rf model</a>
   <a class="nav-item" href="evaluation.html">evaluation</a>
@@ -352,12 +352,12 @@
 </main>
 
 <footer class="footer">
-  <span>SentimentEdge v1.0 · ProsusAI/FinBERT + Random Forest · Backend: </span>
+  <span>SentimentEdge v1.0 · ProsusAI/FinBERT + Random Forest · Backend: http://localhost:5000</span>
   <span>Research prototype · Not financial advice</span>
 </footer>
 
 <script>
-const API      = "";
+const API      = const API=window.location.origin;
 let selectedStock = "AAPL";
 const sessionHistory = [];
 
