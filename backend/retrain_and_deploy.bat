@@ -1,13 +1,13 @@
 @echo off
 echo ============================================
-echo   SentimentEdge - Retrain and Deploy
+echo   AlphaSignal - Retrain and Deploy to HF
 echo ============================================
 echo.
 
 :: ── Step 1: Train the model ──
 echo [1/4] Training RF model...
 cd /d D:\sentimentEdge\backend
-python train.py
+python train.py --csv analise_sentimentos_ibovespa_twitter.csv
 if %errorlevel% neq 0 (
     echo ERROR: Training failed! Check your train.py
     pause
@@ -16,7 +16,7 @@ if %errorlevel% neq 0 (
 echo Training complete!
 echo.
 
-:: ── Step 2: Copy files to HF folder ──
+:: ── Step 2: Copy model files to HF folder ──
 echo [2/4] Copying model files to HF folder...
 copy /Y D:\sentimentEdge\backend\rf_model.joblib D:\sentimentEdge\hf-sentimentedge\backend\
 copy /Y D:\sentimentEdge\backend\model_metrics.json D:\sentimentEdge\hf-sentimentedge\backend\
@@ -28,7 +28,7 @@ if %errorlevel% neq 0 (
 echo Files copied!
 echo.
 
-:: ── Step 3: Git add and commit ──
+:: ── Step 3: Git commit ──
 echo [3/4] Committing to git...
 cd /d D:\sentimentEdge\hf-sentimentedge
 git add .

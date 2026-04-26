@@ -5,8 +5,6 @@
   <title>SentimentEdge — Dataset Analyzer</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <script src="{{ url_for('static', filename='app.js') }}"></script>
   <style>
 :root{--ob:#030508;--surf:#0c1219;--elev:#111a24;--rim:#1a2535;--cyan:#00e5ff;--cd:rgba(0,229,255,0.13);--amb:#ffb300;--rose:#ff4d6d;--emer:#00e676;--slate:#4a5568;--fog:#8896a8;--snow:#e8edf2;--fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -116,10 +114,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 </header>
 
 <nav class="nav">
-  <a class="ni" href="/">Overview</a>
-  <a class="ni act" href="/analyzer">Analyzer</a>
-  <a class="ni" href="/finbert">FinBERT</a>
-  <a class="ni" href="/evaluation">Evaluation</a>
+  <a class="ni" href="../index.html">Overview</a>
+  <a class="ni act" href="analyzer.html">Analyzer</a>
+  <a class="ni" href="finbert.html">FinBERT</a>
+  <a class="ni" href="evaluation.html">Evaluation</a>
 </nav>
 
 <main class="main">
@@ -213,7 +211,7 @@ tick();setInterval(tick,1000);
 
 async function checkConn(){
   try{
-    const r=await fetch("https://vectorxx-sentiment.hf.space/api/status",{signal:AbortSignal.timeout(3000)});
+    const r=await fetch("http://localhost:5000/api/status",{signal:AbortSignal.timeout(3000)});
     const d=await r.json();
     if(d.status==="online"){document.getElementById("cbadge").className="badge on";document.getElementById("ctext").textContent="Backend Online";}
   }catch{document.getElementById("ctext").textContent="Backend Offline";}

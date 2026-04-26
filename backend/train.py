@@ -177,7 +177,7 @@ def load_any_csv(csv_path: str, preview: bool = False) -> pd.DataFrame:
 
     for enc in ["utf-8","latin-1","cp1252","utf-16"]:
         try:
-            df = pd.read_csv(csv_path, encoding=enc, low_memory=False)
+            df = pd.read_csv(csv_path, encoding=enc, low_memory=False)    
             break
         except Exception:
             continue
