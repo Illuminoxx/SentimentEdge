@@ -11,7 +11,7 @@ for next-day stock movement prediction.
 |---|---|
 | Sentiment model | ProsusAI/FinBERT |
 | Movement classifier | Random Forest (scikit-learn) |
-| Data source | Reddit (PRAW) + yFinance |
+| Data source | historical tweets data |
 | Backend | Flask |
 | Deployment | Hugging Face Spaces (Docker) |
 
@@ -22,7 +22,7 @@ for next-day stock movement prediction.
 4. Random Forest predicts next-day movement (Rise/Fall)
 
 ## Run Locally (fully offline)
-git clone https://github.com/Illuminoxx/SentimentEdge.git
-cd SentimentEdge
-pip install -r requirements.txt
-python backend/app.py
+-git clone https://github.com/Illuminoxx/SentimentEdge.git
+-cd SentimentEdge
+-pip install -r requirements.txt
+-python backend/app.py
